@@ -1,51 +1,109 @@
 package champollion;
 
-public class Enseignant extends Personne {
+import java.util.ArrayList;
+import java.util.List;
 
-    // TODO : rajouter les autres méthodes présentes dans le diagramme UML
+public class Enseignant extends Personne {
 
     public Enseignant(String nom, String email) {
         super(nom, email);
     }
 
-    /**
-     * Calcule le nombre total d'heures prévues pour cet enseignant en "heures équivalent TD" Pour le calcul : 1 heure
-     * de cours magistral vaut 1,5 h "équivalent TD" 1 heure de TD vaut 1h "équivalent TD" 1 heure de TP vaut 0,75h
-     * "équivalent TD"
-     *
-     * @return le nombre total d'heures "équivalent TD" prévues pour cet enseignant, arrondi à l'entier le plus proche
-     *
-     */
+    List<ServicePrevu> servicesPrevus = new ArrayList<ServicePrevu>();
+    List<Intervention> interventions = new ArrayList<Intervention>();
+
     public int heuresPrevues() {
-        // TODO: Implémenter cette méthode
-        throw new UnsupportedOperationException("Pas encore implémenté");
+        float total=0;
+        for (ServicePrevu services : servicesPrevus){
+            total+=services.getCM()*1.5;
+            total+=services.getTD();
+            total+=services.getTP()*0.75;
+        }
+        return Math.round(total);
     }
 
-    /**
-     * Calcule le nombre total d'heures prévues pour cet enseignant dans l'UE spécifiée en "heures équivalent TD" Pour
-     * le calcul : 1 heure de cours magistral vaut 1,5 h "équivalent TD" 1 heure de TD vaut 1h "équivalent TD" 1 heure
-     * de TP vaut 0,75h "équivalent TD"
-     *
-     * @param ue l'UE concernée
-     * @return le nombre total d'heures "équivalent TD" prévues pour cet enseignant, arrondi à l'entier le plus proche
-     *
-     */
+    public boolean enSousService(){
+        if (this.heuresPrevues()<192){
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+
     public int heuresPrevuesPourUE(UE ue) {
-        // TODO: Implémenter cette méthode
-        throw new UnsupportedOperationException("Pas encore implémenté");
+        float total=0;
+        for (ServicePrevu services : servicesPrevus){
+            if (services.getUE().equals(ue)){
+                total+=services.getCM()*1.5;
+                total+=services.getTD();
+                total+=services.getTP()*0.75;
+            }
+        }
+        return Math.round(total);
     }
 
-    /**
-     * Ajoute un enseignement au service prévu pour cet enseignant
-     *
-     * @param ue l'UE concernée
-     * @param volumeCM le volume d'heures de cours magitral
-     * @param volumeTD le volume d'heures de TD
-     * @param volumeTP le volume d'heures de TP
-     */
-    public void ajouteEnseignement(UE ue, int volumeCM, int volumeTD, int volumeTP) {
-        // TODO: Implémenter cette méthode
-        throw new UnsupportedOperationException("Pas encore implémenté");
+   
+    public void ajouteEnseignement(UE ue, int CM, int TD, int TP) {
+        boolean existant= false;
+        for (ServicePrevu services : servicesPrevus){
+            //si l'enseignant possède déjà un service prévu pour l'UE en paramètre, on additionne les heures
+            if (services.getUE().equals(ue)){
+                services.setCM(services.getCM()+CM);
+                services.setTD(services.getTD()+TD);
+                services.setTP(services.getTP()+TP);
+                existant=true;
+            }
+        }
+        if (existant==false){
+            servicesPrevus.add(new ServicePrevu(this,ue, CM, TD, TP)); //si l'enseignant n'a pas de service prévu, on l'ajoute à la liste
+        }
     }
+    
+    public void ajouteIntervention(Intervention inter) {
+        for (ServicePrevu services : servicesPrevus){
+            //si on veut ajouter une intervention à une UE et qu'un enseignant n'a pas d'enseignements planifiés dans cet UE, on lève une exception
+            if (!(services.getUE().equals(inter.getMatiere()))){
+                throw new IllegalArgumentException("L'UE n'est pas planifiée pour cet enseignant");
+            }
+            interventions.add(inter);
+        }
+    }
+    
+    
+    public int resteAPlanifier(UE ue, TypeIntervention type) {
+
+        int heuresPrevues=0;
+        for (ServicePrevu services : servicesPrevus){
+            //si on veut rechercher le nombre d'heures à planifier dans une UE et qu'un enseignant n'a pas d'enseignements planifiés dans cet UE, on lève une exception
+            if (!(services.getUE().equals(ue))){
+                throw new IllegalArgumentException("Cette UE n'est pas planifié");
+            }
+
+            else {
+                switch (type) {
+                    case CM:
+                        heuresPrevues=services.getCM();
+                        break;
+                    case TD:
+                        heuresPrevues=services.getTD();
+                        break;
+                    case TP:
+                        heuresPrevues=services.getTP();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        int heuresEffect=0;
+        for (Intervention inter : interventions){
+            if (inter.getMatiere().equals(ue) && inter.getType().equals(type)){
+                heuresEffect=inter.getDuree();
+            }
+        }
+        return (heuresPrevues-heuresEffect);
+    }
+
 
 }
