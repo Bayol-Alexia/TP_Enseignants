@@ -17,14 +17,16 @@ public class Intervention {
     private int heureDebut;
     private TypeIntervention type;
     private UE matiere;
+    private Salle lieu;
 
-    public Intervention(Date debut, int duree, boolean annulee, int heureDebut, TypeIntervention type, UE matiere) {
+    public Intervention(Date debut, int duree, int heureDebut, TypeIntervention type, UE matiere, Salle lieu) {
         this.debut = debut;
         this.duree = duree;
         this.annulee = annulee;
         this.heureDebut = heureDebut;
         this.type = type;
         this.matiere = matiere;
+        this.lieu = lieu;
     }
 
     public Date getDebut() {
