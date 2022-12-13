@@ -62,12 +62,28 @@ public class ChampollionJUnitTest {
 	}
         
         @Test
-	public void testAjoutInterventionUEInvalide(){
+	public void testAjouterInterventions(){
 		untel.ajouteEnseignement(uml, 10, 10, 10);
 		try{
 			untel.ajouteIntervention(new Intervention(new Date(), 1, 14, TypeIntervention.TD, java, new Salle("B019", 30)));
 			fail("Cet appel doit lever une exception");
 		} catch (IllegalArgumentException e){
 		}
-        }
+	}
+        
+        @Test
+	public void testAPlanifier(){
+		untel.ajouteEnseignement(uml, 20, 10, 30);
+
+		untel.ajouteIntervention(new Intervention(new Date(), 2, 15, TypeIntervention.CM, uml, new Salle("B012", 30)));
+                untel.ajouteIntervention(new Intervention(new Date(), 5, 14, TypeIntervention.TD, uml, new Salle("B019", 30)));
+		untel.ajouteIntervention(new Intervention(new Date(), 10, 15, TypeIntervention.TP, uml, new Salle("B011", 30)));
+		
+                assertEquals(18, untel.resteAPlanifier(uml, TypeIntervention.CM),"Il doit rester 18 h de CM à planifier");
+		assertEquals(5, untel.resteAPlanifier(uml, TypeIntervention.TD),"Il doit rester 5 h de TD à planifier");
+		assertEquals(20, untel.resteAPlanifier(uml, TypeIntervention.TP),"Il doit rester 20 h de CM à planifier");
+	}
+        
+        
+        
 }
